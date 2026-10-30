@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>anni3</title>
+    <style>
+      * { box-sizing: border-box; }
+
+      html {
+        margin: 0;
+        min-height: 100%;
+        scroll-behavior: smooth;
+        background: #fff;
+      }
+
+      @font-face {
+        font-family: "Reenie Beanie";
+        src: url("ReenieBeanie.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #f7f1ea;
+      }
+
+      .page {
+        width: 100%;
+        display: grid;
+        place-items: center;
+        margin: 0;
+      }
+
+      .frame {
+        position: relative;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .frame video,
+      .frame img,
+      .page-two img {
+        display: block;
+        width: min(100vw, calc(100vh * 9 / 16));
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
+        background: transparent;
+      }
+
+      .page-two-artwork {
+        position: relative;
+        width: min(100vw, calc(100vh * 9 / 16));
+        max-width: 100%;
+        line-height: 0;
+      }
+
+      .page-two-artwork img {
+        width: 100%;
+        max-width: none;
+        height: auto;
+      }
+
+      .postit-reason {
+        position: absolute;
+        left: 23%;
+        top: 53%;
+        width: 54%;
+        height: 29%;
+        display: grid;
+        place-items: center;
+        padding: 5% 7%;
+        border: 0;
+        background: transparent;
+        color: #573a3a;
+        font-family: "Reenie Beanie", cursive;
+        font-size: clamp(0.9rem, 3vw, 1.3rem);
+        font-weight: 400;
+        line-height: 1.1;
+        text-align: center;
+        white-space: normal;
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      .postit-reason span {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+      }
+
+      .postit-reason:focus-visible {
+        outline: 2px solid #573a3a;
+        outline-offset: -2px;
+      }
+
+      .page-two {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        background: #f7f1ea;
+      }
+
+      .music-player {
+        position: absolute;
+        top: 18px;
+        right: max(14px, calc((100vw - min(100vw, calc(100vh * 9 / 16))) / 2 + 12px));
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0;
+        background: transparent;
+        z-index: 5;
+      }
+
+      .vinyl-wrap {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+      }
+
+      .vinyl {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, #2b2b2b 0 23%, #191919 24% 58%, #0f0f0f 59% 70%, #222 71% 100%);
+        border: 2px solid rgba(255,255,255,0.62);
+        box-shadow: 0 2px 8px rgba(30, 22, 19, 0.25), inset 0 0 0 2px rgba(255,255,255,0.08);
+        animation: spin 2.8s linear infinite;
+        animation-play-state: paused;
+      }
+
+      .vinyl.is-playing {
+        animation-play-state: running;
+      }
+
+      .vinyl::before {
+        content: "";
+        position: absolute;
+        inset: 13px;
+        border-radius: 50%;
+        background: #f3e4d4;
+        box-shadow: inset 0 0 0 2px rgba(0,0,0,0.12);
+      }
+
+      .vinyl::after {
+        content: "";
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: #e9d7c4;
+        border-radius: 50%;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+      }
+
+      .player-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 0;
+      }
+
+      .track-name {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #302522;
+        max-width: 98px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-shadow: none;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 4px;
+      }
+
+      .control-btn {
+        appearance: none;
+        border: none;
+        background: rgba(250, 247, 241, 0.94);
+        color: #352c28;
+        width: 26px;
+        height: 26px;
+        border: 1px solid rgba(58, 43, 35, 0.14);
+        border-radius: 50%;
+        font-size: 0.72rem;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(38, 28, 23, 0.15);
+      }
+
+      .control-btn:active {
+        transform: translateY(1px);
+      }
+
+      .play-toggle {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+        background: #40332f;
+        color: #fffaf3;
+      }
+
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      .polaroid-strip {
+        width: min(100vw, calc(100vh * 9 / 16));
+        max-width: 100%;
+        container-type: inline-size;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 0 0 12px;
+        margin: 0 auto;
+      }
+
+      .polaroid-strip::-webkit-scrollbar {
+        display: none;
+      }
+
+      .polaroid-track {
+        display: flex;
+        gap: 14px;
+        width: max-content;
+        padding: 0 8px;
+      }
+
+      .polaroid {
+        flex: 0 0 auto;
+        width: calc((100cqi - 44px) / 3);
+        scroll-snap-align: start;
+        background: #fdfaf6;
+        padding: 10px 10px 14px;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+        transform: none;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+      }
+
+      .polaroid img {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+        object-fit: cover;
+      }
+
+      .polaroid p {
+        margin: 10px 0 0;
+        text-align: center;
+        font-size: 0.72rem;
+        color: #333;
+        letter-spacing: 0.04em;
+      }
+
+      .calendar-page {
+        min-height: 100vh;
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        background: #f7f1ea;
+      }
+
+      .calendar-artwork {
+        position: relative;
+        width: min(100vw, calc(100vh * 9 / 16));
+        max-width: 100%;
+        line-height: 0;
+      }
+
+      .calendar-artwork img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .calendar-envelope {
+        position: absolute;
+        left: 30%;
+        top: 38%;
+        width: 15%;
+        height: 7.5%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .calendar-envelope:focus-visible,
+      .letter-close:focus-visible {
+        outline: 2px solid #573a3a;
+        outline-offset: 2px;
+      }
+
+      .letter-dialog {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-width: none;
+        max-height: none;
+        margin: auto;
+        padding: 0;
+        border: 0;
+        background: #7d2722;
+        place-items: center;
+      }
+
+      .letter-dialog[open] {
+        display: grid;
+      }
+
+      .letter-dialog::backdrop {
+        background: #7d2722;
+      }
+
+      .letter-close {
+        display: grid;
+        place-items: center;
+        width: min(100vw, calc(100dvh * 9 / 16));
+        height: 100dvh;
+        max-width: 100vw;
+        max-height: 100dvh;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .letter-close img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-height: 100dvh;
+        object-fit: contain;
+      }
+
+      @media (max-width: 767px) {
+        .page,
+        .page .frame {
+          min-height: 100vh;
+          min-height: 100svh;
+        }
+
+        .page .frame video,
+        .page .frame img {
+          width: 100vw;
+          max-width: none;
+          height: 100vh;
+          height: 100svh;
+          object-fit: cover;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page" aria-label="Video voorpagina">
+      <div class="frame">
+        <video id="frontVideo" autoplay muted loop playsinline preload="auto" poster="anni3 (2).png" aria-label="Front page video" onerror="this.style.display='none'; document.getElementById('fallbackImage').style.display='block';">
+          <source src="frontp.mp4" type="video/mp4">
+        </video>
+        <img id="fallbackImage" src="anni3 (2).png" alt="Afbeelding" style="display:none;">
+      </div>
+    </main>
+
+    <section class="page-two" aria-label="Tweede pagina">
+      <div class="music-player" aria-label="Mini vinyl music player">
+        <div class="vinyl-wrap">
+          <div class="vinyl" id="vinylDisc" aria-hidden="true"></div>
+        </div>
+
+        <div class="player-meta">
+          <div class="track-name" id="nowPlaying">Beautiful Boy</div>
+          <div class="controls">
+            <button class="control-btn" id="prevBtn" type="button" aria-label="Vorige track" disabled>⏮</button>
+            <button class="control-btn play-toggle" id="playPauseBtn" type="button" aria-label="Afspelen">▶</button>
+            <button class="control-btn" id="nextBtn" type="button" aria-label="Volgende track" disabled>⏭</button>
+          </div>
+        </div>
+      </div>
+      <audio id="audioPlayer" preload="metadata"></audio>
+
+      <div class="frame">
+        <div class="page-two-artwork">
+          <img src="page2.png" alt="Tweede pagina afbeelding">
+          <button class="postit-reason" id="locketReason" type="button" aria-label="Volgende reden">
+            <span id="locketReasonText" aria-live="polite"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="polaroid-strip" id="polaroidStrip" aria-label="Polaroid foto's, horizontaal scrollbaar" tabindex="0">
+        <div class="polaroid-track" id="polaroidTrack">
+          <article class="polaroid">
+            <img src="IMG_0523.jpeg" alt="Foto 1">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_0611.jpeg" alt="Foto 2">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_0665.jpeg" alt="Foto 3">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_0714.PNG" alt="Foto 4">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_1395.jpeg" alt="Foto 5">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_1802.jpeg" alt="Foto 6">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_2696.jpeg" alt="Foto 7">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_3059.jpeg" alt="Foto 8">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_3376.jpeg" alt="Foto 9">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_3818.jpeg" alt="Foto 10">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_4225.jpeg" alt="Foto 11">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_7360.jpeg" alt="Foto 12">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_7739.jpeg" alt="Foto 13">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_9448.jpeg" alt="Foto 14">
+          </article>
+          <article class="polaroid">
+            <img src="4b593e19-cc56-4fb3-b8b2-c46a982b6922.JPG" alt="Foto 15">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_0624.jpeg" alt="Foto 16">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_0868.jpeg" alt="Foto 17">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_1353.jpeg" alt="Foto 18">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_1645.jpeg" alt="Foto 19">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_1724.jpeg" alt="Foto 20">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_2493.jpeg" alt="Foto 21">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_2551.jpeg" alt="Foto 22">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_2559.jpeg" alt="Foto 23">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_2782.jpeg" alt="Foto 24">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_3231.jpeg" alt="Foto 25">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_6588.jpeg" alt="Foto 26">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_8879.jpeg" alt="Foto 27">
+          </article>
+          <article class="polaroid">
+            <img src="IMG_9947.jpeg" alt="Foto 28">
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="calendar-page" aria-label="Kalenderpagina">
+      <div class="calendar-artwork">
+        <img src="calender page.png" alt="Kalenderpagina met een envelop">
+        <button class="calendar-envelope" id="calendarEnvelope" type="button" aria-label="Open de brief" aria-haspopup="dialog"></button>
+      </div>
+    </section>
+
+    <dialog class="letter-dialog" id="letterDialog" aria-label="Brief">
+      <button class="letter-close" id="closeLetter" type="button" aria-label="Sluit de brief">
+        <img src="letterpage.png" alt="Liefdesbrief; klik om te sluiten">
+      </button>
+    </dialog>
+
+    <script>
+      const vinylDisc = document.getElementById('vinylDisc');
+      const nowPlaying = document.getElementById('nowPlaying');
+      const playPauseBtn = document.getElementById('playPauseBtn');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const audioPlayer = document.getElementById('audioPlayer');
+      const calendarEnvelope = document.getElementById('calendarEnvelope');
+      const letterDialog = document.getElementById('letterDialog');
+      const closeLetter = document.getElementById('closeLetter');
+
+      calendarEnvelope.addEventListener('click', () => letterDialog.showModal());
+      closeLetter.addEventListener('click', () => letterDialog.close());
+
+      let tracks = [{
+        title: 'Beautiful Boy',
+        url: 'Beautiful_Boy_-_John_Lennon_Lyrics.mp3'
+      }, {
+        title: 'True',
+        url: 'True_2003_Remaster.mp3'
+      }, {
+        title: 'Fresh Eyes',
+        url: '[Andy_Grammer] Andy_Grammer_-_Fresh_Eyes_Official_Lyric_Video.mp3'
+      }, {
+        title: 'Right Side of My Neck',
+        url: '[Tweny] Faye_Webster_-_Right_Side_of_My_Neck.mp3'
+      }, {
+        title: 'Apple Cider',
+        url: '[Beabadoobee] Beabadoobee_-_Apple_Cider.mp3'
+      }, {
+        title: 'My Kind of Woman',
+        url: '[CapturedTracks] Mac_DeMarco_My_Kind_Of_Woman.mp3'
+      }, {
+        title: 'Kiss Me',
+        url: '[Lyrics_90s] Sixpence_None_The_Richer_-_Kiss_Me_Lyrics.mp3'
+      }, {
+        title: 'Kingston',
+        url: '[Worldly_Hits] Faye_Webster_Kingston_Lyrics.mp3'
+      }, {
+        title: 'I Love You',
+        url: '[Century_Lyric] Fontaines_D.C._-_I_Love_You_Lyrics.mp3'
+      }, {
+        title: 'Kissing a Fool',
+        url: '[MeJeNiFeRx] George_Michael_-_Kissing_a_Fool_lyrics.mp3'
+      }, {
+        title: 'Is This Love',
+        url: 'Whitesnake_-_Is_This_Love_Lyrics.mp4'
+      }, {
+        title: 'The Blonde',
+        url: 'TV_Girl_-_The_Blonde_Lyrics.mp4'
+      }, {
+        title: 'Back to the Old House',
+        url: 'The_Smiths_-_Back_To_The_Old_House_Official_Audio.mp4'
+      }, {
+        title: 'Every Breath You Take',
+        url: 'The_Police_-_Every_Breath_You_Take_Lyrics.mp4'
+      }, {
+        title: 'Lovefool',
+        url: 'The_Cardigans_-_Lovefool_Lyrics.mp4'
+      }, {
+        title: 'Lovers Rock',
+        url: 'Sade_-_Lovers_Rock_Audio.mp4'
+      }, {
+        title: 'My Love Mine All Mine',
+        url: 'Mitski_-_My_Love_Mine_All_Mine.mp4'
+      }, {
+        title: 'The Girl Is Mine',
+        url: 'Michael_Jackson_-_The_Girl_Is_Mine_Audio_ft._Paul_McCartney.mp4'
+      }, {
+        title: 'Everybody Here Wants You',
+        url: 'Jeff_Buckley_-_Everybody_Here_Wants_You_Lyrics.mp4'
+      }, {
+        title: 'The American Dawn',
+        url: 'Her_-_The_American_Dawn_audio.mp4'
+      }, {
+        title: 'Always Forever',
+        url: 'Cults_-_Always_Forever.mp4'
+      }, {
+        title: 'Hello',
+        url: 'Clairo_-_Hello_feat._Rejjie_Snow.mp4'
+      }, {
+        title: 'All I Did Was Dream of You',
+        url: 'beabadoobee_-_All_I_Did_Was_Dream_of_You_Lyrics_ft._The_Marias.mp4'
+      }];
+
+      for (let index = tracks.length - 1; index > 0; index--) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [tracks[index], tracks[randomIndex]] = [tracks[randomIndex], tracks[index]];
+      }
+
+      let currentTrackIndex = 0;
+      let isPlaying = false;
+
+      function updateTrackDisplay() {
+        nowPlaying.textContent = tracks.length ? tracks[currentTrackIndex].title : 'Kies muziek';
+        playPauseBtn.disabled = tracks.length === 0;
+        prevBtn.disabled = tracks.length < 2;
+        nextBtn.disabled = tracks.length < 2;
+      }
+
+      async function playCurrentTrack() {
+        updateTrackDisplay();
+        if (!tracks.length) return;
+
+        audioPlayer.src = tracks[currentTrackIndex].url;
+        audioPlayer.load();
+        try {
+          await audioPlayer.play();
+        } catch {
+          setPlaybackState(false);
+        }
+      }
+
+      function setPlaybackState(playing) {
+        isPlaying = playing;
+        vinylDisc.classList.toggle('is-playing', playing);
+        playPauseBtn.textContent = playing ? '❚❚' : '▶';
+        playPauseBtn.setAttribute('aria-label', playing ? 'Pauzeren' : 'Afspelen');
+      }
+
+      function togglePlayback() {
+        if (!tracks.length) return;
+
+        if (audioPlayer.paused) {
+          if (audioPlayer.src) {
+            audioPlayer.play().catch(() => setPlaybackState(false));
+          } else {
+            playCurrentTrack();
+          }
+        } else {
+          audioPlayer.pause();
+        }
+      }
+
+      function goToTrack(nextIndex, autoplay = isPlaying) {
+        currentTrackIndex = (nextIndex + tracks.length) % tracks.length;
+        updateTrackDisplay();
+        audioPlayer.pause();
+        audioPlayer.removeAttribute('src');
+        if (autoplay) {
+          playCurrentTrack();
+        }
+      }
+
+      playPauseBtn.addEventListener('click', togglePlayback);
+      prevBtn.addEventListener('click', () => goToTrack(currentTrackIndex - 1));
+      nextBtn.addEventListener('click', () => goToTrack(currentTrackIndex + 1));
+      audioPlayer.addEventListener('play', () => setPlaybackState(true));
+      audioPlayer.addEventListener('pause', () => setPlaybackState(false));
+      audioPlayer.addEventListener('ended', () => goToTrack(currentTrackIndex + 1, true));
+
+      updateTrackDisplay();
+
+      const reasons = [
+        "Omdat je mijn favoriete persoon bent in de hele wereld",
+        "Omdat als we samen ligen we perfect in elkaar passen",
+        "Omdat alles leuker is als jij erbij bent",
+        "Omdat je we samen over de domste dingen tot diep in de nacht kunnen praten",
+        "Omdat we elkaar motiveren om de beste van onszelf te zijn",
+        "Omdat we soms ook niks hoeven te zeggen en we elkaar vast kunnen houden",
+        "Omdat je altijd zo lief bent voor mij en niet bang bent om dat te laten zien aan anderen",
+        "Omdat we altijd samen een sweet treat delen en dan vechten over wie het laatste stukje krijgt",
+        "Je een stiekeme nerd bent en ik dat stiekem heel leuk vind",
+        "We samen zo erg kunnen ratten in bed en dan de hele dag niks doen",
+        "Je altijd precies lekker naar Siem ruikt",
+        "Als er iemand is die zoals thuis voelt jij dat bent",
+        "Ik je altijd mis als ik alleen in bed lig en jij er niet bent",
+        "Als ik iets zien wat ik leuk vind, denk ik altijd aan jou en wil ik het met je delen",
+        "Als we samen liggen kan ik je in je ogen kijken en perfect je kusjes geven",
+        "We kwetsbaar kunnen zijn bij elkaar",
+        "Als je iets gemeens zegt meteen mij gaat knuffelen om comfort te zoeken",
+        "Ik je altijd por maar je jezelf nu kan verdedigen en ik dat stiekem heel leuk vind",
+        "We altijd samen zo lekker eten samen", 
+        "We altijd zo erg op een lijn liggen en elkaar begrijpen zonder woorden",
+        "Wij allebei echt enorme ratjes zijn",
+        "Ik altijd wens dat we samen blijven en gelukkig zijn als ik een kaarsje uit blaas of een wimper weg blaas",
+        "We lekkere dingen kunnen eten en dan samen een dutje doen in elkaars armen",
+        "Als we een film willen kijken vaak toch de helft van de film niet kijken",
+        "Als we samen naar bed gaan meteen onze kleren uit doen en lekker tegen elkaar aan kruipen",
+        "Als we een afscheidsknuffel geven knijpen we elkaar altijd helemaal plet",
+        "We zo goed samen zijn in bed:)",
+        "We elkaars freak heeeeel goed matchen",
+        "We allebei jaloerse ratjes kunnen zijn en er dan om kunnen lachen",
+        "Ik jouw oren mag schoonmaken en jij mijn navel",
+        "Ik mijn koude billetjes bij jou mag opwarmen in de winter",
+        "We elkaar als vers deeg masseren en een mini spa momentje hebben met jouw relax muziek met die steentjes",
+        "Ik bij liefdesliesdjes altijd aan je moet denken",
+        "Je soms je tong in mijn mond steekt ookal raak ik dan overstimulated",
+        "We bij alle domme katjes zeggen dat zijn wij",
+        "Je altijd je tongetje uitsteekt als je zit te focussen en je dan lijkt op een konijntje",
+        "Je zo trots als een klein kindje je dingetjes laat zien die je maakt in je game en ik dan zo trots op je ben"
+      ];
+
+      for (let index = reasons.length - 1; index > 0; index--) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [reasons[index], reasons[randomIndex]] = [reasons[randomIndex], reasons[index]];
+      }
+
+      const locketReasonText = document.getElementById('locketReasonText');
+      let currentReasonIndex = 0;
+      locketReasonText.textContent = reasons[currentReasonIndex];
+      document.getElementById('locketReason').addEventListener('click', () => {
+        currentReasonIndex = (currentReasonIndex + 1) % reasons.length;
+        locketReasonText.textContent = reasons[currentReasonIndex];
+      });
+
+      const polaroidStrip = document.getElementById('polaroidStrip');
+      const polaroidTrack = document.getElementById('polaroidTrack');
+      const polaroidCards = Array.from(polaroidTrack.children);
+      polaroidCards.forEach((card) => {
+        const clone = card.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        polaroidTrack.append(clone);
+      });
+
+      let rotationTimer;
+      let resumeTimer;
+
+      function movePolaroids() {
+        if (!polaroidCards.length) return;
+
+        const trackStyle = getComputedStyle(polaroidTrack);
+        const cardWidth = polaroidCards[0].getBoundingClientRect().width + parseFloat(trackStyle.columnGap);
+        const loopWidth = polaroidCards.length * cardWidth;
+
+        if (polaroidStrip.scrollLeft >= loopWidth) {
+          const scrollBehavior = polaroidStrip.style.scrollBehavior;
+          polaroidStrip.style.scrollBehavior = 'auto';
+          polaroidStrip.scrollLeft -= loopWidth;
+          requestAnimationFrame(() => {
+            polaroidStrip.style.scrollBehavior = scrollBehavior;
+          });
+        }
+
+        polaroidStrip.scrollBy({ left: cardWidth, behavior: 'smooth' });
+      }
+
+      function startPolaroidRotation() {
+        clearInterval(rotationTimer);
+        rotationTimer = setInterval(movePolaroids, 3000);
+      }
+
+      function pauseForManualScroll() {
+        clearInterval(rotationTimer);
+        clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(startPolaroidRotation, 900);
+      }
+
+      polaroidStrip.addEventListener('pointerdown', () => {
+        clearInterval(rotationTimer);
+        clearTimeout(resumeTimer);
+      });
+      polaroidStrip.addEventListener('pointerup', pauseForManualScroll);
+      polaroidStrip.addEventListener('pointercancel', pauseForManualScroll);
+      polaroidStrip.addEventListener('wheel', (event) => {
+        if (event.deltaX || event.shiftKey) pauseForManualScroll();
+      }, { passive: true });
+
+      startPolaroidRotation();
+    </script>
+  </body>
+</html>
